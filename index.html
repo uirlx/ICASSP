@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="generator" content="Hugo 0.88.1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href=""https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+	<link rel="stylesheet" href="css/custom.css">
+	<link rel="stylesheet" href="css/normalize.css">
+
+	<title>Real-Time Speech Synthesis</title>
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body data-new-gr-c-s-check-loaded="14.1091.0" data-gr-ext-installed="">
+
+<div class="container" >
+<header role="banner">
+</header>
+<main role="main">
+<article itemscope itemtype="https://schema.org/BlogPosting">
+
+<div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+	<div class="text-center">
+	<h1>Real-Time Speech Synthesis:</h1>
+        <h4> Enhancing Real Time Text-to-Speech Synthesis Efficiency
+			through Weighted Samplers and Consistency Models</h4>
+
+        <p class="fst-italic mb-0">
+			<br>
+			 <br>
+			<p></p>
+        </p>
+        <p><b></b></p>
+	</div>
+	<style>
+    p {
+        text-align: justify;
+        text-justify: inter-word;
+    }
+	</style>
+	<p>
+        <b>Abstract.</b> 
+		Neural Text-to-Speech (TTS) systems find broad applications in voice assistants, e-learning, and audiobook creation. The pursuit of advanced models, like Diffusion Models, holds promise for achieving high-fidelity, real-time speech synthesis. Yet, the efficiency of multi-step sampling in Diffusion Models presents challenges. Efforts have been made to integrate GANs with DMs, speeding up inference by approximating denoising distributions, but this introduces issues with model convergence due to adversarial training. To overcome this, we introduce CM-TTS, a novel architecture grounded in consistency models. Drawing inspiration from continuous-time diffusion models, CM-TTS achieves top-quality speech synthesis in fewer steps without adversarial training or pre-trained model dependencies. Our weighted samplers ensure unbiased training, preserving the advantages of Diffusion-based TTS. We present a real-time mel-spectrogram generation consistency model, validated through comprehensive evaluations. Experimental results underscore CM-TTS 's superiority over existing single-step speech synthesis systems, representing a significant advancement in the field.
+		<br>
+
+		<br>
+			This page is <b>intended</b>  solely for the purpose of research demonstration.
+		<br>
+
+      </p>
+</div>
+		
+<div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">		
+	<h2 id="model-overview" style="text-align: center;">Overview</h2>
+	<body>
+		<p style="text-align: center;">
+			<img src="pics/CM-TTS_4.svg" width="1200">
+		</p>
+	</body>
+
+</div>
+
+<div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+	<h2 id="sr-samples" style="text-align: center;">VCTK Samples</h2>
+		<div class="table-responsive pt-3">
+			<table class="table table-hover pt-2">
+			<thead>
+			<tr>
+			<th style="text-align: center">Text</th>
+			<th style="text-align: center">Ground Truth</th>
+			<th style="text-align: center">DiffGAN-TTS</th>
+			<th style="text-align: center">CM-TTS</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+			<td style="text-align: left;vertical-align:middle;width: 500px">It is an amazing response..</td>
+			<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p227-306_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p227-306_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p227-306_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">An appeal against the sentence was dismissed the following year.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p228-067_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p228-067_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p228-067_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">I can't get a job.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p228-250_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p228-250_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p228-250_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">She died in hospital two hours later.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p229-072_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p229-072_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p229-072_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">We're into that build-up now.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p329-056_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p329-056_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p329-056_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">We are not out of touch with politics.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p334-104_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p334-104_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p334-104_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">It's not just going to be busy.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p339-400_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p339-400_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p339-400_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">There is nothing like a fresh start..</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p376-392_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p376-392_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p376-392_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">They will know they deserve to be there..</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p341-174_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p341-174_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK/p341-174_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			</tbody>
+			</table>
+		</div>
+</div>
+
+
+<div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+	<h2 id="sr-samples" style="text-align: center;">LJSpeech Samples</h2>
+		<div class="table-responsive pt-3">
+			<table class="table table-hover pt-2">
+			<thead>
+			<tr>
+			<th style="text-align: center">Text</th>
+			<th style="text-align: center">Ground Truth</th>
+			<th style="text-align: center">DiffGAN-TTS</th>
+			<th style="text-align: center">CM-TTS</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+			<td style="text-align: left;vertical-align:middle;width: 500px">America has produced a good many showy books, the typography, paper, and illustrations of which are, however, all wrong.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ001-0105_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ001-0105_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ001-0105_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<td style="text-align: left;vertical-align:middle;width: 500px">Still clings to a foolish, because misunderstood conventionality, deduced from what was once ornament, and is by no means useful.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ001-0116_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ001-0116_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ001-0116_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<td style="text-align: left;vertical-align:middle;width: 500px">But these king's witnesses were also put at times into the press yard among the capital convicts, seemingly a very dangerous proceeding.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ002-0060_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ002-0060_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ002-0060_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<td style="text-align: left;vertical-align:middle;width: 500px">The prison was always in "the most filthy state imaginable.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ002-0202_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ002-0202_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ002-0202_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<td style="text-align: left;vertical-align:middle;width: 500px">No remonstrance was attended to,.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ003-0004_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ003-0004_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ003-0004_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<td style="text-align: left;vertical-align:middle;width: 500px">Also to make such proposals as might appear salutary, and calculated to improve newgate and the rest of the city jails.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ003-0293_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ003-0293_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ003-0293_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<td style="text-align: left;vertical-align:middle;width: 500px">Confinement for twelve months in the bristol jail was counted a punishment equivalent to seven years' transportation..</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ004-0174_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ004-0174_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech/LJ004-0174_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tbody>
+			</table>
+		</div>
+</div>
+
+
+<div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+	<h2 id="sr-samples" style="text-align: center;">Zero-shot on VCTK</h2>
+		<div class="table-responsive pt-3">
+			<table class="table table-hover pt-2">
+			<thead>
+			<tr>
+			<th style="text-align: center">Text</th>
+			<th style="text-align: center">Ground Truth</th>
+			<th style="text-align: center">DiffGAN-TTS</th>
+			<th style="text-align: center">CM-TTS</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+			<td style="text-align: left;vertical-align:middle;width: 500px">An appeal against the sentence was dismissed the following year..</td>
+			<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p228-067_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p228-067_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p228-067_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">I can't get a job.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p228-250_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p228-250_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p228-250_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">As, indeed, they would be.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p228-350_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p228-350_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p228-350_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">He was good, but not that good.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p234-295_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p234-295_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p234-295_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">The greeks used to imagine that it was a sign from the gods to foretell war or heavy rain.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p239-015_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p239-015_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p239-015_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">It was an amazing result.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p233-064_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p233-064_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p233-064_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">It's not even finished.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p229-320_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p229-320_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/VCTK_Zero/p229-320_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			</tbody>
+			</table>
+		</div>
+</div>
+
+
+<div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+	<h2 id="sr-samples" style="text-align: center;">Zero-shot on LJSpeech</h2>
+		<div class="table-responsive pt-3">
+			<table class="table table-hover pt-2">
+			<thead>
+			<tr>
+			<th style="text-align: center">Text</th>
+			<th style="text-align: center">Ground Truth</th>
+			<th style="text-align: center">DiffGAN-TTS</th>
+			<th style="text-align: center">CM-TTS</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+			<td style="text-align: left;vertical-align:middle;width: 500px">It was long before the many jurisdictions imitated the few.</td>
+			<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ005-0105_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ005-0105_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ005-0105_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">That punishment must be reformatory as well as deterrent.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ006-0031_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ006-0031_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ006-0031_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">All these evils were set forth at length in the inspectors' first report.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ006-0045_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ006-0045_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ006-0045_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">That he appeared to feel deeply the force of the reverend gentleman's observations, especially when the chaplain spoke of.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ011-0050_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ011-0050_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ011-0050_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">The prisoner was forthwith extradited and sent back to england, which he reached with his escort on the seventeenth september the same year.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ018-0039_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ018-0039_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ018-0039_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">And that a new system of prison discipline should be introduced.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ019-0105_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ019-0105_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ019-0105_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">To safeguard business against unfair competition.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ023-0085_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ023-0085_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ023-0085_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">The formations, the ridge formations and characteristics, were insufficient for purposes of either effecting identification.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ032-0127_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ032-0127_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ032-0127_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">And abandoned because of the expense. as to the entire reconstruction of newgate, nothing had been done as yet.</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ019-0178_hifgan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ019-0178_gan.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/LJSpeech_Zero/LJ019-0178_cm.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			</tbody>
+			</table>
+		</div>
+</div>
+
+<div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+	<h2 id="sr-samples" style="text-align: center;">Hard Case</h2>
+		<div class="table-responsive pt-3">
+			<table class="table table-hover pt-2">
+			<thead>
+			<tr>
+			<th style="text-align: center">Text</th>
+			<th style="text-align: center">CM-TTS</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+			<td style="text-align: left;vertical-align:middle;width: 500px">Actress Fan Bingbing attends the screening of ’Ash Is Purest White (Jiang Hu Er Nv)’ during the 71st annual Cannes Film Festival</td>
+			<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/Hard/Actress Fan Bingbing attends the screening of ’Ash Is Purest White (Jiang Hu Er Nv)’ during the 71st.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">22222222 hello 2222222</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/Hard/22222222 hello 22222222.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">h t t p colon slash slash teams slash sites slash T A G slash default dot aspx As always , any feedb ck , comments ,</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/Hard/h t t p colon slash slash teams slash sites slash T A G slash default dot aspx As always , any feedb.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">config file must contain A , B , C , D , E , F , and G .</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/Hard/config file must contain A , B , C , D , E , F , and G ..wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">int1 , int2 , int3 , int4 , int5 , int6 , int7 , int8 , int9 ,</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/Hard/int1 , int2 , int3 , int4 , int5 , int6 , int7 , int8 , int9 ,.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">K</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/Hard/K.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">two thousand and five h t t p colon slash slash news dot com dot com slash i slash n e slash f d slash two zero zero three slash f d</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/Hard/two thousand and five h t t p colon slash slash news dot com dot com slash i slash n e slash f d sla.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			<tr>
+				<td style="text-align: left;vertical-align:middle;width: 500px">zero zero one , MS03 - zero twenty five , MS03 - zero thirty two , MS03 - zero thirty nine ,</td>
+				<td style="text-align: center"><audio controls="controls" style="width: 160px;"><source src="audio/Hard/zero zero one , MS03 - zero twenty five , MS03 - zero thirty two , MS03 - zero thirty nine ,.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+			</tr>
+			</tbody>
+			</table>
+		</div>
+</div>
+
+<div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+	<h2 id="VCTK Mel-spectrogram Comparison" style="text-align: center;">VCTK Mel-spectrogram Comparison</h2>
+  <div class="row">
+    <div class="col container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+      <p style="text-align: center; font-size: 24px; margin-top: 28px;">
+		Ground Truth.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/VCTKpng/p283-137_hifgan.png" width="270">
+		</p>
+		</body>
+		<p style="text-align: center; font-size: 24px;">
+		Ground Truth.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/VCTKpng/p299-308_hifgan.png" width="220">
+		</p>
+	</body>
+		<p style="text-align: center; font-size: 24px;">
+		Ground Truth.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/VCTKpng/p294-346_hifgan.png" width="350">
+		</p>
+	</body>
+    </div>
+	  <div class="col container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+      <p style="text-align: center; font-size: 24px; margin-top: 28px;">
+		DiffGAN-TTS.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/VCTKpng/p283-137_gan.png" width="270">
+		</p>
+		</body>
+		<p style="text-align: center; font-size: 24px;">
+		DiffGAN-TTS.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/VCTKpng/p299-308_gan.png" width="220">
+		</p>
+	</body>
+		<p style="text-align: center; font-size: 24px;">
+		CM-TTS.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/VCTKpng/p294-346_gan.png" width="350">
+		</p>
+	</body>
+    </div>
+    <div class="col container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+      <p style="text-align: center; font-size: 24px; margin-top: 28px;">
+		CM-TTS.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/VCTKpng/p283-137_cm.png" width="270">
+		</p>
+		</body>
+		<p style="text-align: center; font-size: 24px;">
+		CM-TTS.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/VCTKpng/p299-308_cm.png" width="220">
+		</p>
+	</body>
+		<p style="text-align: center; font-size: 24px;">
+		CM-TTS.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/VCTKpng/p294-346_cm.png" width="350">
+		</p>
+	</body>
+    </div>
+  </div>
+</div>
+
+
+<div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+	<h2 id="LJSpeech Mel-spectrogram Comparison" style="text-align: center;">LJSpeech Mel-spectrogram Comparison</h2>
+  <div class="row">
+    <div class="col container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+      <p style="text-align: center; font-size: 24px; margin-top: 28px;">
+		Ground Truth.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/LJpng/LJ050-0033_hifgan.png" width="400">
+		</p>
+		</body>
+		<p style="text-align: center; font-size: 24px;">
+		DiffGAN-TTS.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/LJpng/LJ050-0033_gan.png" width="400">
+		</p>
+	</body>
+		<p style="text-align: center; font-size: 24px;">
+		CM-TTS.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/LJpng/LJ050-0033_cm.png" width="400">
+		</p>
+	</body>
+    </div>
+    <div class="col container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+      <p style="text-align: center; font-size: 24px; margin-top: 28px;">
+		Ground Truth.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/LJpng/LJ026-0116_hifgan.png" width="485">
+		</p>
+		</body>
+		<p style="text-align: center; font-size: 24px;">
+		DiffGAN-TTS.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/LJpng/LJ026-0116_gan.png" width="485">
+		</p>
+	</body>
+		<p style="text-align: center; font-size: 24px;">
+		CM-TTS.
+	</p>
+		<body>
+		<p style="text-align: center;">
+			<img src="audio/LJpng/LJ026-0116_cm.png" width="485">
+		</p>
+	</body>
+    </div>
+  </div>
+</div>
+
+<div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">	
+	<h2 id=Ethics-Statement style="text-align: center;">	
+		Ethics Statement
+	</h2>
+	<p>
+		Given the ability of CM-TTS to synthesize speech while preserving the speaker's identity, potential risks of misuse, such as deceiving voice recognition systems or impersonating specific individuals, may arise. In our experiments, we operate under the assumption that users willingly agree to be the designated speaker for speech synthesis. In the event of the model's application to unknown speakers in real-world scenarios, it is imperative to establish a protocol ensuring explicit consent from speakers for the utilization of their voices. Additionally, implementing a synthetic speech detection model is recommended to mitigate the potential for misuse.
+	</p>
+</div>
+
+
+
+</article>
+</main>
+</div>
+
+</body>
+</html>
