@@ -65,18 +65,19 @@
 <div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
     <h2 id="sr-samples" style="text-align: center;">Chinese Samples</h2>
     <div class="table-responsive pt-3">
-        <table class="table table-hover pt-2">
+        <table class="table table-hover pt-2" style="table-layout: fixed; width: 100%;">
             <thead>
                 <tr>
-                    <th style="text-align: left;">Scripts</th>
-                    <th style="text-align: center; padding-left: 20px;">Framework Synthesis</th>
+                    <th style="text-align: center; vertical-align: middle;">Scripts</th>
+                    <th style="text-align: center; vertical-align: middle; padding-left: 20px;">Framework Synthesis</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <!-- Scripts 列 -->
-                    <td style="text-align: left; vertical-align: middle; width: 500px;">
-                        <pre style="white-space: pre-wrap; word-wrap: break-word;">
+                    <!-- Scripts 列，居中显示 -->
+                    <td style="text-align: center; vertical-align: middle; width: 50%;">
+                        <div style="border: 1px solid #ccc; padding: 10px; width: 90%; margin: 0 auto; display: inline-block;">
+                            <pre style="white-space: pre-wrap; word-wrap: break-word; height: 200px; overflow-y: scroll; border: 1px solid #ddd; padding: 10px;">
 {
     "id": "0",
     "topic": "讨论家庭聚会的安排",
@@ -108,14 +109,17 @@
         }
     ]
 }
-                        </pre>
+                            </pre>
+                        </div>
                     </td>
-                    <!-- Framework Synthesis 列，音频图标居中 -->
-                    <td style="text-align: center; vertical-align: middle;">
-                        <audio controls="controls" style="width: 160px;">
-                            <source src="audio/conversation0.wav" autoplay />
-                            Your browser does not support the audio element.
-                        </audio>
+                    <!-- Framework Synthesis 列，音频图标居中显示且拉长 -->
+                    <td style="text-align: center; vertical-align: middle; width: 50%;">
+                        <div style="margin: 0 auto; display: inline-block;">
+                            <audio controls="controls" style="width: 200px; height: 50px;">
+                                <source src="audio/conversation0.wav" autoplay />
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
                     </td>
                 </tr>
             </tbody>
