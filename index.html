@@ -10,7 +10,7 @@
 	<link rel="stylesheet" href="css/custom.css">
 	<link rel="stylesheet" href="css/normalize.css">
 
-	<title>Real-Time Speech Synthesis</title>
+	<title>DialogueAgents</title>
 	<link href="css/bootstrap.min.css" rel="stylesheet">
 
 </head>
@@ -25,10 +25,8 @@
 
 <div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
 	<div class="text-center">
-	<h1>Real-Time Speech Synthesis:</h1>
-        <h4> Enhancing Real Time Text-to-Speech Synthesis Efficiency
-			through Weighted Samplers and Consistency Models</h4>
-
+	<h1>DialogueAgents:</h1>
+        <h4> A Hybrid Agent-Based Speech Synthesis Framework for Multi-Party Dialogue</h4>
         <p class="fst-italic mb-0">
 			<br>
 			 <br>
@@ -44,7 +42,7 @@
 	</style>
 	<p>
         <b>Abstract.</b> 
-		Neural Text-to-Speech (TTS) systems find broad applications in voice assistants, e-learning, and audiobook creation. The pursuit of advanced models, like Diffusion Models, holds promise for achieving high-fidelity, real-time speech synthesis. Yet, the efficiency of multi-step sampling in Diffusion Models presents challenges. Efforts have been made to integrate GANs with DMs, speeding up inference by approximating denoising distributions, but this introduces issues with model convergence due to adversarial training. To overcome this, we introduce CM-TTS, a novel architecture grounded in consistency models. Drawing inspiration from continuous-time diffusion models, CM-TTS achieves top-quality speech synthesis in fewer steps without adversarial training or pre-trained model dependencies. Our weighted samplers ensure unbiased training, preserving the advantages of Diffusion-based TTS. We present a real-time mel-spectrogram generation consistency model, validated through comprehensive evaluations. Experimental results underscore CM-TTS 's superiority over existing single-step speech synthesis systems, representing a significant advancement in the field.
+		Speech synthesis is essential for advancing human-computer interaction. However, current datasets for training speech synthesis models often suffer from high construction costs, limited role diversity, and poor emotional expression. In this paper, we propose DialogueAgent, a hybrid agent-based speech synthesis framework for multi-party dialogue. DialogueAgent employs three specialized agents—Script Writer, Speech Generator, and Dialogue Critic—to collaboratively generate and refine dialogues. By iteratively adapting the script to better fit the conversation scenario through speech review and feedback, the framework enhances emotional expressiveness and paralinguistic features in synthesized speech. Using this framework, we introduce MultiTalk, a bilingual, multi-party, multi-turn speech dialogue dataset covering diverse topics. Additionally, we present two metrics tailored to dialogue-level speech evaluation to measure the emotional expressiveness and naturalness of turn-taking. Extensive experiments demonstrate the effectiveness of our framework and the high quality of the MultiTalk dataset.
 		<br>
 
 		<br>
