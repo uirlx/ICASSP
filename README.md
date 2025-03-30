@@ -1,7 +1,7 @@
 # DialogueAgents
 
 #介绍
-项目仓库地址 https://github.com/limafang/DialogueAgents
+项目仓库地址 https://github.com/uirlx/ICME.git
 
 如果需要修改内容 在index.html文件进行修改
 * 图片是 img标签 
